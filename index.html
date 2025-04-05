@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أذكار وأدعية ومواقيت الصلاة</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Naskh Arabic', serif;
+            /* Fallback background */
+            background-color: #f5f1e9; /* A light beige fallback */
+        }
+        /* Custom Scrollbar - More subtle */
+        .custom-scrollbar::-webkit-scrollbar {
+             width: 5px;
+             height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+             background: transparent; /* Make track invisible */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+             background: rgba(180, 160, 130, 0.4); /* Soft brown/beige thumb */
+             border-radius: 10px;
+             border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(180, 160, 130, 0.6);
+        }
+        /* Smooth scroll */
+        html {
+             scroll-behavior: smooth;
+        }
+        /* Simple text shadow for potentially better readability on complex backgrounds */
+        .text-shadow-soft {
+             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        /* Islamic pattern background - subtle overlay */
+        .pattern-overlay {
+            /* --- IMPORTANT --- */
+            /* Ensure you have an image named 'islamic-pattern.jpg' in the same folder */
+            /* OR replace 'islamic-pattern.jpg' with a valid image URL */
+            /* OR remove this background-image style if you don't have a pattern */
+            background-image: url('islamic-pattern.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* Added background color here as well for better overlay effect if image loads */
+            background-color: #f5f1e9;
+        }
+        /* Refined category buttons */
+        .category-btn {
+            background-color: rgba(242, 235, 227, 0.8); /* Light beige, semi-transparent */
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid rgba(210, 190, 165, 0.3); /* Faint border */
+            color: #8b6b44; /* Mid-brown text */
+            cursor: pointer;
+        }
+        .category-btn:hover {
+            background-color: rgba(232, 220, 202, 0.9); /* Slightly darker on hover */
+            transform: translateY(-1px); /* Subtle lift */
+        }
+        /* Combined active state for simplicity */
+        .category-btn.active {
+            background-color: rgba(232, 220, 202, 1); /* Less transparent when active */
+            color: #6d4c2f; /* Darker text */
+            font-weight: 500;
+            transform: scale(1.03); /* Slightly larger */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); /* Inner shadow */
+            border-color: rgba(210, 190, 165, 0.5);
+        }
+        /* Card style for prayer times */
+        .prayer-card {
+            background-color: rgba(248, 240, 227, 0.95); /* Slightly lighter beige, high opacity */
+            backdrop-filter: blur(4px); /* A bit more blur */
+            color: #6F553A; /* Darker brown text */
+            border-radius: 1.5rem; /* Match sm:rounded-3xl */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Slightly deeper shadow */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Slightly more visible border */
+            padding: 1.5rem 2rem; /* Match sm:p-8 */
+            transition: opacity 0.4s ease-in-out; /* Slightly longer fade */
+            opacity: 0; /* Start hidden */
+            min-height: 200px; /* Ensure space while loading */
+        }
+        /* Styling for prayer time items */
+        .prayer-time-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* Align items vertically */
+            padding: 10px 0; /* Slightly more padding */
+            border-bottom: 1px solid rgba(142, 111, 77, 0.1); /* Faint line like Adkar card */
+        }
+        .prayer-time-item:last-child {
+            border-bottom: none;
+        }
+        .prayer-time-label {
+            font-weight: 500;
+            color: #8E6F4D; /* Mid brown */
+        }
+        .prayer-time-value {
+            font-weight: 700;
+            font-size: 1.1em; /* Make time slightly larger */
+            color: #6F553A; /* Darker brown */
+            background-color: rgba(255, 255, 255, 0.3); /* Subtle background for time */
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        /* Loading/Error state styling */
+        .status-message {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+            color: #8E6F4D;
+        }
+        /* Adkar card style */
+        .adkar-card { /* Added a specific class for easier selection if needed */
+             background-color: rgba(248, 240, 227, 0.95); /* Similar to prayer card */
+             backdrop-filter: blur(4px);
+             color: #4a3b2a; /* Darker base text */
+             border-radius: 1.5rem; /* Match sm:rounded-3xl */
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+             border: 1px solid rgba(255, 255, 255, 0.3);
+             padding: 1.5rem 2rem; /* Match sm:p-8 */
+             transition: opacity 0.4s ease-in-out;
+             opacity: 0; /* Start hidden */
+             min-height: 350px;
+             display: flex; /* Use flex for better structure */
+             flex-direction: column;
+             margin-bottom: 2rem; /* Consistent margin */
+        }
+        /* Ensure the scrollable area takes available space */
+        .adkar-scroll-wrapper {
+            flex-grow: 1; /* Allows the div to grow */
+            overflow-y: auto;
+            overflow-x: hidden; /* Hide horizontal scroll */
+            max-height: calc(55vh - 100px); /* Adjust max height based on viewport, subtract approx header/footer height */
+            margin-bottom: 1rem; /* Space before footer */
+            padding-left: 8px; /* Space for scrollbar */
+        }
+
+    </style>
+    <script>
+      // Optional Tailwind Configuration (Looks good)
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'custom-beige': {
+                light: '#F8F0E3',
+                DEFAULT: '#EADDCF',
+                dark: '#D1C0A8'
+              },
+              'custom-brown': {
+                 DEFAULT: '#8E6F4D',
+                 dark: '#6F553A'
+              }
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="antialiased pattern-overlay">
+
+    <div class="relative min-h-screen w-full flex flex-col items-center justify-start pt-6 sm:pt-10 pb-10 px-4 sm:px-6 lg:px-8 overflow-y-auto custom-scrollbar">
+        <!-- Content Container -->
+        <div class="relative z-10 w-full max-w-2xl">
+
+            <!-- == Adkar Section == -->
+            <!-- Category Selection Buttons -->
+            <div id="category-buttons" class="mb-6 flex flex-wrap justify-center gap-2 sm:gap-3 px-2">
+                <!-- Buttons load here -->
+                <span class="text-custom-brown/80 py-2 px-4">تحميل الأقسام...</span>
+            </div>
+
+            <!-- Adkar Display Card -->
+            <!-- Applied .adkar-card class -->
+            <div id="adkar-display" class="adkar-card">
+
+                <!-- Header (Category Title) -->
+                <h2 id="adkar-category" class="text-2xl sm:text-3xl font-bold mb-5 text-custom-brown text-center text-shadow-soft flex-shrink-0">
+                    <!-- Category loads here -->
+                </h2>
+                <hr class="border-custom-brown/10 mb-5 flex-shrink-0">
+
+                <!-- Scrollable Content Area -->
+                 <!-- Applied .adkar-scroll-wrapper and .custom-scrollbar -->
+                <div class="adkar-scroll-wrapper custom-scrollbar pr-2 sm:pr-3">
+                    <p id="adkar-content" class="text-xl sm:text-2xl leading-relaxed sm:leading-loose text-stone-800 text-justify">
+                        <!-- Adkar content loaded here -->
+                        جاري التحميل...
+                    </p>
+                </div>
+
+                <!-- Meta Info (Count & Description) - Moved outside scroll wrapper -->
+                <div class="mt-auto pt-4 border-t border-custom-brown/10 text-sm sm:text-base w-full flex flex-wrap justify-between items-center gap-x-4 gap-y-2 flex-shrink-0">
+                    <span id="adkar-count" class="bg-custom-beige text-custom-brown px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm"></span>
+                    <p id="adkar-description" class="text-custom-brown/90 text-xs sm:text-sm text-left md:text-right flex-grow">
+                        <!-- Description loaded here -->
+                    </p>
+                </div>
+
+                <!-- Next Button Container -->
+                <div class="mt-6 sm:mt-8 text-center flex-shrink-0">
+                    <button id="next-dhikr"
+                            class="bg-custom-brown hover:bg-custom-brown-dark text-white
+                                   font-bold py-2.5 px-8 rounded-xl shadow-md hover:shadow-lg
+                                   transition-all duration-200 ease-in-out transform hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-custom-brown/50 focus:ring-offset-2 focus:ring-offset-custom-beige-light invisible">
+                        ذكر آخر
+                    </button>
+                </div>
+            </div>
+
+            <!-- Adkar Error Message Area -->
+            <div id="adkar-error-message" class="mt-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative shadow hidden text-center mb-8">
+                <strong class="font-bold">خطأ في الأذكار!</strong>
+                <span class="block sm:inline"> لا يمكن تحميل بيانات الأذكار. يرجى التأكد من وجود ملف `adkar.json` صالح بجانب ملف HTML والمحاولة مرة أخرى.</span>
+            </div>
+
+            <!-- == Prayer Times Section == -->
+            <div id="prayer-times-section" class="prayer-card w-full">
+                 <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-custom-brown text-center text-shadow-soft">
+                    مواقيت الصلاة
+                </h2>
+
+                <!-- Loading/Error State -->
+                <div id="prayer-status" class="status-message">
+                    <p>جاري تحديد موقعك وتحميل المواقيت...</p>
+                </div>
+
+                <!-- Prayer Times Content (Hidden initially) -->
+                <div id="prayer-content" class="hidden">
+                    <div class="text-center mb-4 text-sm text-custom-brown/80">
+                        <p id="prayer-location">الموقع: غير محدد</p>
+                        <p id="prayer-date-gregorian" class="mt-1">التاريخ الميلادي: -</p>
+                        <p id="prayer-date-hijri" class="mt-1">التاريخ الهجري: -</p>
+                    </div>
+                    <hr class="border-custom-brown/10 mb-4">
+                    <div id="prayer-times-list">
+                        <!-- Prayer times will be populated here -->
+                        <div class="prayer-time-item">
+                            <span class="prayer-time-label">الفجر</span>
+                            <span id="fajr-time" class="prayer-time-value">--:--</span>
+                        </div>
+                        <div class="prayer-time-item">
+                            <span class="prayer-time-label">الشروق</span>
+                            <span id="sunrise-time" class="prayer-time-value">--:--</span>
+                        </div>
+                        <div class="prayer-time-item">
+                            <span class="prayer-time-label">الظهر</span>
+                            <span id="dhuhr-time" class="prayer-time-value">--:--</span>
+                        </div>
+                        <div class="prayer-time-item">
+                            <span class="prayer-time-label">العصر</span>
+                            <span id="asr-time" class="prayer-time-value">--:--</span>
+                        </div>
+                         <div class="prayer-time-item">
+                            <span class="prayer-time-label">المغرب</span>
+                            <span id="maghrib-time" class="prayer-time-value">--:--</span>
+                        </div>
+                        <div class="prayer-time-item">
+                            <span class="prayer-time-label">العشاء</span>
+                            <span id="isha-time" class="prayer-time-value">--:--</span>
+                        </div>
+                    </div>
+                     <p class="text-xs text-center mt-4 text-custom-brown/60">
+                        المواقيت حسب طريقة أم القرى (مكة). المصدر: AlAdhan API
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const categoryButtonsContainer = document.getElementById('category-buttons');
+        const adkarDisplay = document.getElementById('adkar-display');
+        const adkarCategoryElement = document.getElementById('adkar-category');
+        const adkarContentElement = document.getElementById('adkar-content');
+        // Select the scrollable wrapper directly
+        const adkarContentWrapper = adkarDisplay.querySelector('.adkar-scroll-wrapper');
+        const adkarCountElement = document.getElementById('adkar-count');
+        const adkarDescriptionElement = document.getElementById('adkar-description');
+        const adkarErrorMessageElement = document.getElementById('adkar-error-message');
+        const nextDhikrButton = document.getElementById('next-dhikr');
+
+        // Prayer Times DOM Elements
+        const prayerTimesSection = document.getElementById('prayer-times-section');
+        const prayerStatusElement = document.getElementById('prayer-status');
+        const prayerContentElement = document.getElementById('prayer-content');
+        const prayerLocationElement = document.getElementById('prayer-location');
+        const prayerDateGregorianElement = document.getElementById('prayer-date-gregorian');
+        const prayerDateHijriElement = document.getElementById('prayer-date-hijri');
+        const fajrTimeElement = document.getElementById('fajr-time');
+        const sunriseTimeElement = document.getElementById('sunrise-time');
+        const dhuhrTimeElement = document.getElementById('dhuhr-time');
+        const asrTimeElement = document.getElementById('asr-time');
+        const maghribTimeElement = document.getElementById('maghrib-time');
+        const ishaTimeElement = document.getElementById('isha-time');
+
+
+        // --- State Variables ---
+        let adkarData = null;
+        let currentCategory = null;
+        let activeCategoryButton = null;
+
+        // --- Adkar Functions ---
+
+        function displayRandomAdkar(categoryName) {
+            // Start fade out
+            adkarDisplay.style.opacity = '0';
+
+            // Update content after fade out (adjust timeout if needed)
+            setTimeout(() => {
+                if (!adkarData || !adkarData[categoryName] || adkarData[categoryName].length === 0) {
+                    console.warn("Adkar category not found or empty:", categoryName); // Use warn for empty category
+                    adkarCategoryElement.textContent = categoryName || 'خطأ في القسم';
+                    adkarContentElement.textContent = 'لا توجد أذكار متاحة حاليًا في هذا القسم.';
+                    adkarCountElement.textContent = '';
+                    adkarDescriptionElement.textContent = '';
+                    nextDhikrButton.classList.add('invisible');
+                    adkarErrorMessageElement.classList.add('hidden'); // Ensure adkar error is hidden if category is just empty
+                } else {
+                    const categoryAdkar = adkarData[categoryName];
+                    const randomIndex = Math.floor(Math.random() * categoryAdkar.length);
+                    const dhikr = categoryAdkar[randomIndex];
+
+                    adkarCategoryElement.textContent = dhikr.category;
+                    adkarContentElement.textContent = dhikr.content;
+                    adkarCountElement.textContent = `التكرار: ${dhikr.count}`;
+                    adkarDescriptionElement.textContent = dhikr.description || ''; // Handle potentially missing description
+                    currentCategory = categoryName; // Update current category state
+                    nextDhikrButton.classList.remove('invisible');
+                    adkarErrorMessageElement.classList.add('hidden'); // Hide adkar error on success
+                }
+
+                // Scroll content area to top smoothly
+                if (adkarContentWrapper) {
+                    adkarContentWrapper.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                     console.error("Adkar content wrapper not found for scrolling.");
+                }
+
+                // Start fade in
+                adkarDisplay.style.opacity = '1';
+
+            }, 300); // Match transition duration (or slightly less)
+        }
+
+        function handleCategoryClick(button, categoryName) {
+            // Reset previous button efficiently
+            if (activeCategoryButton) {
+                activeCategoryButton.classList.remove('active');
+            }
+
+            // Style current button as active
+            button.classList.add('active');
+            activeCategoryButton = button; // Update reference to the new active button
+
+            displayRandomAdkar(categoryName);
+        }
+
+        function loadAdkarData() {
+            // --- IMPORTANT ---
+            // Make sure 'adkar.json' file exists in the same directory as this HTML file.
+            fetch('adkar.json')
+                .then(response => {
+                    if (!response.ok) {
+                        // Provide more specific error info if possible
+                        throw new Error(`فشل تحميل الملف: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(setupAdkar) // Pass data to setup function
+                .catch(error => {
+                    console.error('خطأ في تحميل أو تحليل ملف adkar.json:', error);
+                    // Display user-friendly error message
+                    adkarErrorMessageElement.classList.remove('hidden');
+                    adkarDisplay.style.opacity = '0'; // Hide the adkar display card smoothly
+                    categoryButtonsContainer.innerHTML = `<span class="text-red-600 py-2 px-4">فشل تحميل الأذكار (${error.message})</span>`;
+                });
+        }
+
+         function setupAdkar(data) {
+            adkarData = data; // Store fetched data
+            categoryButtonsContainer.innerHTML = ''; // Clear "loading..." message
+
+            const categories = Object.keys(adkarData);
+
+            if (categories.length === 0) {
+                 // Handle case where JSON is valid but empty
+                 categoryButtonsContainer.innerHTML = '<span class="text-custom-brown/80 py-2 px-4">لا توجد أقسام أذكار معرفة</span>';
+                 adkarCategoryElement.textContent = 'أذكار وأدعية';
+                 adkarContentElement.textContent = 'لم يتم العثور على أذكار.';
+                 adkarCountElement.textContent = '';
+                 adkarDescriptionElement.textContent = '';
+                 adkarDisplay.style.opacity = '1'; // Show the card even if empty
+                 nextDhikrButton.classList.add('invisible');
+                 return;
+            }
+
+            // Create category buttons
+            categories.forEach(categoryName => {
+                const button = document.createElement('button');
+                button.textContent = categoryName;
+                button.className = 'category-btn'; // Use the base class
+                // Add ARIA attributes for accessibility
+                button.setAttribute('role', 'tab');
+                button.setAttribute('aria-selected', 'false');
+                button.onclick = () => {
+                    // Update ARIA state on click
+                    if(activeCategoryButton) activeCategoryButton.setAttribute('aria-selected', 'false');
+                    button.setAttribute('aria-selected', 'true');
+                    handleCategoryClick(button, categoryName);
+                };
+                categoryButtonsContainer.appendChild(button);
+            });
+
+            // Automatically select and display the first category
+            const firstButton = categoryButtonsContainer.querySelector('button');
+            if (firstButton) {
+                // Set initial ARIA state
+                firstButton.setAttribute('aria-selected', 'true');
+                handleCategoryClick(firstButton, categories[0]); // Trigger click simulation
+            }
+        }
+
+
+        // --- Prayer Times Functions ---
+
+        function displayPrayerTimes(data) {
+            const timings = data.data.timings;
+            const date = data.data.date;
+
+            // Update times (ensure elements exist before setting textContent)
+            if(fajrTimeElement) fajrTimeElement.textContent = timings.Fajr;
+            if(sunriseTimeElement) sunriseTimeElement.textContent = timings.Sunrise;
+            if(dhuhrTimeElement) dhuhrTimeElement.textContent = timings.Dhuhr;
+            if(asrTimeElement) asrTimeElement.textContent = timings.Asr;
+            if(maghribTimeElement) maghribTimeElement.textContent = timings.Maghrib;
+            if(ishaTimeElement) ishaTimeElement.textContent = timings.Isha;
+
+            // Update dates
+            if(prayerDateGregorianElement) prayerDateGregorianElement.textContent = `التاريخ الميلادي: ${date.readable}`;
+            if(prayerDateHijriElement) {
+                const hijri = date.hijri;
+                // Format Hijri date string carefully (check for month object)
+                const hijriMonthName = hijri.month && hijri.month.ar ? hijri.month.ar : '';
+                prayerDateHijriElement.textContent = `التاريخ الهجري: ${hijri.day} ${hijriMonthName} ${hijri.year}`;
+            }
+
+
+            // Update location - Simple confirmation
+            if(prayerLocationElement) prayerLocationElement.textContent = `الموقع: تم التحديد تلقائياً`;
+
+            // Show content, hide status
+            if(prayerStatusElement) prayerStatusElement.classList.add('hidden');
+            if(prayerContentElement) prayerContentElement.classList.remove('hidden');
+            // Fade in the prayer card
+            if(prayerTimesSection) prayerTimesSection.style.opacity = '1';
+        }
+
+        function displayPrayerError(message) {
+            if(prayerStatusElement) {
+                prayerStatusElement.innerHTML = `<p class="text-red-600 font-semibold">${message}</p>`;
+                prayerStatusElement.classList.remove('hidden');
+            }
+            if(prayerContentElement) prayerContentElement.classList.add('hidden');
+            // Fade in the prayer card to show the error
+             if(prayerTimesSection) prayerTimesSection.style.opacity = '1';
+        }
+
+        function fetchPrayerTimes(latitude, longitude) {
+            const date = new Date();
+            // Format date as DD-MM-YYYY for the API
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+            const year = date.getFullYear();
+            const dateString = `${day}-${month}-${year}`;
+
+            // Using Method 3 (Umm al-Qura) - Common in Saudi Arabia and Gulf
+            // School 0 (Standard Shafi, Maliki, Hanbali Asr time)
+            // API Reference: https://aladhan.com/prayer-times-api#GetTimings
+            const apiURL = `https://api.aladhan.com/v1/timings/${dateString}?latitude=${latitude}&longitude=${longitude}&method=3&school=0`;
+
+            fetch(apiURL)
+                .then(response => {
+                    if (!response.ok) {
+                        // Throw an error with status text for better debugging
+                        throw new Error(`خطأ في استجابة الواجهة البرمجية: ${response.statusText} (Code: ${response.status})`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Check the API's own status code
+                    if (data.code === 200 && data.status === "OK") {
+                        displayPrayerTimes(data);
+                    } else {
+                        // Throw error if API indicates failure
+                        throw new Error(data.status || data.message || 'فشل في جلب بيانات المواقيت من الواجهة البرمجية');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching or processing prayer times:', error);
+                    displayPrayerError(`حدث خطأ أثناء جلب مواقيت الصلاة. الرجاء المحاولة لاحقاً. (${error.message})`);
+                });
+        }
+
+        function getLocationAndFetchTimes() {
+             // Make prayer card visible immediately to show loading/error status
+             if(prayerTimesSection) prayerTimesSection.style.opacity = '1';
+
+            if (!navigator.geolocation) {
+                displayPrayerError('عذرًا، المتصفح الخاص بك لا يدعم خدمة تحديد الموقع الجغرافي.');
+                return;
+            }
+
+            // Request location
+            navigator.geolocation.getCurrentPosition(
+                // Success Callback
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                     if(prayerStatusElement) prayerStatusElement.innerHTML = '<p>تم تحديد الموقع بنجاح، جاري تحميل المواقيت...</p>';
+                    fetchPrayerTimes(latitude, longitude);
+                },
+                // Error Callback
+                (error) => {
+                    let errorMessage = 'حدث خطأ غير متوقع أثناء محاولة تحديد موقعك.';
+                    // Provide specific messages based on the error code
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'تم رفض إذن الوصول إلى موقعك. لا يمكن جلب المواقيت بدون السماح بالوصول للموقع.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'تعذر تحديد موقعك الحالي. قد تكون خدمة تحديد المواقع غير متاحة أو لا تعمل.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'انتهت مهلة طلب تحديد الموقع. يرجى المحاولة مرة أخرى.';
+                            break;
+                        default:
+                            errorMessage = `خطأ غير معروف في تحديد الموقع (Code: ${error.code}).`;
+                            break;
+                    }
+                    console.error('Geolocation Error Details:', error); // Log the full error object
+                    displayPrayerError(errorMessage);
+                },
+                // Options for geolocation request
+                {
+                     enableHighAccuracy: false, // Lower accuracy is faster and uses less power
+                     timeout: 10000, // Stop trying after 10 seconds
+                     maximumAge: 300000 // Accept a cached position up to 5 minutes old (300000ms)
+                }
+            );
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load Adkar data first
+            loadAdkarData();
+            // Then attempt to get location and prayer times
+            getLocationAndFetchTimes();
+        });
+
+
+        // --- Event Listener for "Next Dhikr" Button ---
+        nextDhikrButton.addEventListener('click', () => {
+            // Ensure data is loaded and a category is selected
+            if (currentCategory && adkarData) {
+                displayRandomAdkar(currentCategory);
+            } else {
+                console.warn("Next button clicked but no current category or adkar data available.");
+            }
+        });
+    </script>
+
+</body>
+</html>
